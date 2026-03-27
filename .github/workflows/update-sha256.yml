@@ -8,7 +8,6 @@ on:
     - cron: "*/5 * * * *"
   workflow_dispatch:
 
-
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -16,16 +15,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-  - name: Fetch nightly release metadata
-  id: nightly
-  run: |
-    curl -sL \
-      https://api.github.com/repos/smartcmd/MinecraftConsoles/releases/tags/nightly \
-      > release.json
+      - name: Fetch nightly release metadata
+        id: nightly
+        run: |
+          curl -sL \
+            https://api.github.com/repos/smartcmd/MinecraftConsoles/releases/tags/nightly \
+            > release.json
 
-    ASSET_URL=$(jq -r '.assets[] | select(.name == "Minecraft.Client.exe") | .browser_download_url' release.json)
-    echo "asset_url=$ASSET_URL" >> $GITHUB_OUTPUT
+          ASSET_URL=$(jq -r '.assets[] | select(.name == "Minecraft.Client.exe") | .browser_download_url' release.json)
 
+          if [ -z "$ASSET_URL" ]; then
+            echo "ERROR: Minecraft.Client.exe not found in nightly release"
+            exit 1
+          fi
+
+          echo "asset_url=$ASSET_URL" >> $GITHUB_OUTPUT
 
       - name: Download nightly exe
         run: |
