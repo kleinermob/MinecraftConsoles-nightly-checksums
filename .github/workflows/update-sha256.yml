@@ -1,0 +1,40 @@
+name: Update SHA256 for Nightly
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # every 5 minutes
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch nightly release metadata
+        id: nightly
+        run: |
+          curl -sL \
+            https://api.github.com/repos/smartcmd/MinecraftConsoles/releases/tags/nightly \
+            > release.json
+
+          ASSET_URL=$(jq -r '.assets[0].browser_download_url' release.json)
+          echo "asset_url=$ASSET_URL" >> $GITHUB_OUTPUT
+
+      - name: Download nightly exe
+        run: |
+          curl -L -o Minecraft.Client.exe "${{ steps.nightly.outputs.asset_url }}"
+
+      - name: Compute SHA256
+        run: |
+          sha256sum Minecraft.Client.exe > sha256.txt
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+          git add sha256.txt
+          git commit -m "Update SHA256" || exit 0
+          git push
