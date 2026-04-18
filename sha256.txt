@@ -1,1 +1,1 @@
-a57cac752ac4bc0dda5e3657cdd9c4010e26e8da0a1534727cd21b7374fb6256  Minecraft.Client.exe
+bef140a1a96994029153dca8c00b1750b9a5a764fb9db2dc68d7bb40e8a29e8a  Minecraft.Client.exe
